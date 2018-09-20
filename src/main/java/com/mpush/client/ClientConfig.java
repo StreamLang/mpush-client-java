@@ -35,7 +35,7 @@ import com.mpush.api.Constants;
  */
 public final class ClientConfig {
     private final DefaultClientListener clientListener = new DefaultClientListener();
-    public static ClientConfig I = new ClientConfig();
+//    public static ClientConfig I = new ClientConfig();
     private String allotServer;
     private String serverHost;
     private int serverPort;
@@ -60,12 +60,12 @@ public final class ClientConfig {
     private int bindUserTimeoutMills = 3000;
     private int bindUserRetryCount = 1;
 
-    public static ClientConfig build() {
-        return I = new ClientConfig();
-    }
+//    public static ClientConfig build() {
+//        return I = new ClientConfig();
+//    }
 
-    public ClientConfig build(ClientConfig clientConfig){
-        return I = clientConfig;
+    public static ClientConfig build(){
+        return new ClientConfig();
     }
 
     public Client create() {
@@ -74,7 +74,7 @@ public final class ClientConfig {
 
     /*package*/ void destroy() {
         clientListener.setListener(null);
-        I = new ClientConfig();
+//        I = new ClientConfig();
     }
 
     public SessionStorage getSessionStorage() {

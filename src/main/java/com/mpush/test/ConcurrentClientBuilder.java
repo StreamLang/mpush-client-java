@@ -35,8 +35,8 @@ public class ConcurrentClientBuilder implements Runnable {
 //                System.err.println("==========="+user+"==========="+device+"=========");
 //                Client client = ClientConfig
 //                        .build()
-                ClientConfig clientConfig = new ClientConfig();
-                Client client = clientConfig.build(clientConfig)
+//                ClientConfig clientConfig = new ClientConfig();
+                Client client = ClientConfig.build()
                         .setPublicKey(publicKey)
                         //.setAllotServer(allocServer)
                         .setServerHost(serverHost)

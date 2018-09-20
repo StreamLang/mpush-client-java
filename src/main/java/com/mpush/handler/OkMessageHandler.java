@@ -34,6 +34,11 @@ import org.apache.log4j.Logger;
  */
 public final class OkMessageHandler extends BaseMessageHandler<OkMessage> {
     private static final Logger logger = Logger.getLogger(OkMessageHandler.class);
+    private final ClientConfig clientConfig;
+
+    public OkMessageHandler(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
 
     @Override
     public OkMessage decode(Packet packet, Connection connection) {
@@ -43,9 +48,9 @@ public final class OkMessageHandler extends BaseMessageHandler<OkMessage> {
     @Override
     public void handle(OkMessage message) {
         if (message.cmd == Command.BIND.cmd) {
-            ClientConfig.I.getClientListener().onBind(true, message.getConnection().getSessionContext().bindUser);
+           clientConfig.getClientListener().onBind(true, message.getConnection().getSessionContext().bindUser);
         } else if (message.cmd == Command.UNBIND.cmd) {
-            ClientConfig.I.getClientListener().onUnbind(true, null);
+           clientConfig.getClientListener().onUnbind(true, null);
         }
 
         logger.debug(String.format(">>> receive ok message=%s", message));

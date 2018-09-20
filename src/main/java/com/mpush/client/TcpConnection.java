@@ -70,11 +70,11 @@ public final class TcpConnection implements Connection {
     private volatile boolean autoConnect = true;
 
     public TcpConnection(MPushClient client, PacketReceiver receiver) {
-        ClientConfig config = ClientConfig.I;
+
+        ClientConfig config = client.getConfig();
         this.client = client;
-//        this.logger = config.getLogger();
         this.listener = config.getClientListener();
-        this.allotClient = new AllotClient();
+        this.allotClient = new AllotClient(config);
         this.reader = new AsyncPacketReader(this, receiver);
         this.writer = new AsyncPacketWriter(this, connLock);
     }
@@ -212,7 +212,7 @@ public final class TcpConnection implements Connection {
         } catch (Throwable t) {
             IOUtils.close(channel);
             connLock.unlock();
-            logger.error( String.format("connect server ex, [%s:%s]", host, port),t);
+            logger.error( String.format("connect server ex,[%s:%s]", host, port),t);
         }
         return false;
     }

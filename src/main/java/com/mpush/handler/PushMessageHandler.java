@@ -37,7 +37,10 @@ import org.apache.log4j.Logger;
  */
 public final class PushMessageHandler extends BaseMessageHandler<PushMessage> {
     private static final Logger logger = Logger.getLogger(PushMessageHandler.class);
-    private final ClientListener listener = ClientConfig.I.getClientListener();
+    private final ClientListener listener ;
+    public PushMessageHandler(ClientConfig clientConfig) {
+        this.listener = clientConfig.getClientListener();
+    }
 
     @Override
     public PushMessage decode(Packet packet, Connection connection) {

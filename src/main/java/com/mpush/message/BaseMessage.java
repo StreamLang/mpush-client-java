@@ -20,6 +20,7 @@
 package com.mpush.message;
 
 
+import com.mpush.api.Constants;
 import com.mpush.util.IOUtils;
 import com.mpush.client.ClientConfig;
 import com.mpush.api.Message;
@@ -83,7 +84,7 @@ public abstract class BaseMessage implements Message {
         byte[] tmp = encode();
         if (tmp != null && tmp.length > 0) {
             //1.压缩
-            if (tmp.length > ClientConfig.I.getCompressLimit()) {
+            if (tmp.length > Constants.DEF_COMPRESS_LIMIT) {
                 byte[] result = IOUtils.compress(tmp);
                 if (result.length > 0) {
                     tmp = result;

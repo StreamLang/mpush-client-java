@@ -41,6 +41,11 @@ import org.apache.log4j.Logger;
  */
 public final class HandshakeOkHandler extends BaseMessageHandler<HandshakeOkMessage> {
     private static final Logger logger = Logger.getLogger(HandshakeOkHandler.class);
+    private final ClientConfig clientConfig;
+
+    public HandshakeOkHandler(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
 
     @Override
     public HandshakeOkMessage decode(Packet packet, Connection connection) {
@@ -69,7 +74,7 @@ public final class HandshakeOkHandler extends BaseMessageHandler<HandshakeOkMess
 
         //触发握手成功事件
 
-        ClientListener listener = ClientConfig.I.getClientListener();
+        ClientListener listener = clientConfig.getClientListener();
         listener.onHandshakeOk(connection.getClient(), message.heartbeat);
 
         //保存token
@@ -78,7 +83,7 @@ public final class HandshakeOkHandler extends BaseMessageHandler<HandshakeOkMess
     }
 
     private void saveToken(HandshakeOkMessage message, SessionContext context) {
-        SessionStorage storage = ClientConfig.I.getSessionStorage();
+        SessionStorage storage = clientConfig.getSessionStorage();
         if (storage == null || message.sessionId == null) return;
         PersistentSession session = new PersistentSession();
         session.sessionId = message.sessionId;

@@ -34,6 +34,11 @@ import org.apache.log4j.Logger;
  */
 public final class KickUserHandler extends BaseMessageHandler<KickUserMessage> {
     private static final Logger logger = Logger.getLogger(KickUserHandler.class);
+    private final ClientConfig clientConfig;
+
+    public KickUserHandler(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
 
     @Override
     public KickUserMessage decode(Packet packet, Connection connection) {
@@ -43,7 +48,7 @@ public final class KickUserHandler extends BaseMessageHandler<KickUserMessage> {
     @Override
     public void handle(KickUserMessage message) {
         logger.debug(String.format(">>> receive kickUser message=%s", message));
-        ClientListener listener = ClientConfig.I.getClientListener();
+        ClientListener listener = clientConfig.getClientListener();
         listener.onKickUser(message.deviceId, message.userId);
     }
 }

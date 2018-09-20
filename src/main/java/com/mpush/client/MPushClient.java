@@ -21,7 +21,6 @@ package com.mpush.client;
 
 
 import com.mpush.api.Client;
-//import com.mpush.api.Logger;
 import com.mpush.api.ack.AckCallback;
 import com.mpush.api.ack.AckContext;
 import com.mpush.api.connection.SessionContext;
@@ -46,6 +45,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
+
+//import com.mpush.api.Logger;
 
 /**
  * Created by ohun on 2016/1/17.
@@ -72,11 +73,10 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
         return config;
     }
 
-    /*package*/ MPushClient(ClientConfig config) {
+    MPushClient(ClientConfig config) {
         this.config = config;
-//        this.logger = config.getLogger();
 
-        MessageDispatcher receiver = new MessageDispatcher();
+        MessageDispatcher receiver = new MessageDispatcher(config);
 
         if (config.isEnableHttpProxy()) {
             this.httpRequestMgr = HttpRequestMgr.I();
@@ -117,7 +117,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
             this.stop();
             logger.debug("client destroy !!!");
             ExecutorManager.INSTANCE.shutdown();
-            ClientConfig.I.destroy();
+//            ClientConfig.I.destroy();
             clientState.set(State.Destroyed);
         }
     }

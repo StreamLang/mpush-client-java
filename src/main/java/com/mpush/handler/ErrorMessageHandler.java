@@ -37,6 +37,12 @@ import static com.mpush.api.protocol.ErrorCode.REPEAT_HANDSHAKE;
  */
 public final class ErrorMessageHandler extends BaseMessageHandler<ErrorMessage> {
     private static final Logger logger = Logger.getLogger(ErrorMessageHandler.class);
+    private final ClientConfig clientConfig;
+
+    public ErrorMessageHandler(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
+
     @Override
     public ErrorMessage decode(Packet packet, Connection connection) {
         return new ErrorMessage(packet, connection);
@@ -46,7 +52,7 @@ public final class ErrorMessageHandler extends BaseMessageHandler<ErrorMessage> 
     public void handle(ErrorMessage message) {
        logger.info(String.format(">>> receive an error message=%s", message));
         if (message.cmd == Command.FAST_CONNECT.cmd) {
-            ClientConfig.I.getSessionStorage().clearSession();
+           clientConfig.getSessionStorage().clearSession();
             message.getConnection().getClient().handshake();
         } else if (message.cmd == Command.HANDSHAKE.cmd) {
             if (message.code != REPEAT_HANDSHAKE.errorCode //重复握手的错误消息直接忽略

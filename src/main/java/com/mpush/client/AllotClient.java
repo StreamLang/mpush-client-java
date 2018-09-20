@@ -51,6 +51,11 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
     //todo 这里压根没用到alloc
     private List<String> serverAddress = new ArrayList<>();
     private static final Logger logger = Logger.getLogger(AllotClient.class);
+    private final ClientConfig config;
+
+    public AllotClient(ClientConfig config) {
+        this.config = config;
+    }
 
     public List<String> getServerAddress() {
         if (serverAddress.isEmpty()) {
@@ -60,8 +65,6 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
     }
 
     public List<String> queryServerAddressList() {
-        ClientConfig config = ClientConfig.I;
-//        Logger logger = config.getLogger();
 
         if (config.getAllotServer() == null) {
             if (config.getServerHost() != null) {

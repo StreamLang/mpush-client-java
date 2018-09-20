@@ -23,6 +23,7 @@ package com.mpush.handler;
 import com.mpush.api.MessageHandler;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Packet;
+import com.mpush.client.ClientConfig;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,6 +33,11 @@ import org.apache.log4j.Logger;
  */
 public final class HeartbeatHandler implements MessageHandler {
     private static final Logger logger = Logger.getLogger(HandshakeOkHandler.class);
+    private final ClientConfig clientConfig;
+
+    public HeartbeatHandler(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
 
     @Override
     public void handle(Packet packet, Connection connection) {
