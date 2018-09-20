@@ -24,9 +24,9 @@ import com.mpush.api.Client;
 import com.mpush.api.ClientListener;
 import com.mpush.api.connection.SessionStorage;
 import com.mpush.session.FileSessionStorage;
-import com.mpush.util.DefaultLogger;
+//import com.mpush.util.DefaultLogger;
 import com.mpush.api.Constants;
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
 
 /**
  * Created by ohun on 2016/1/17.
@@ -52,8 +52,8 @@ public final class ClientConfig {
     private int compressLimit = Constants.DEF_COMPRESS_LIMIT;
     private SessionStorage sessionStorage;
     private String sessionStorageDir;
-    private Logger logger;
-    private boolean logEnabled;
+//    private Logger logger;
+//    private boolean logEnabled;
     private boolean enableHttpProxy = true;
     private int handshakeTimeoutMills = 3000;
     private int handshakeRetryCount = 0;
@@ -62,6 +62,10 @@ public final class ClientConfig {
 
     public static ClientConfig build() {
         return I = new ClientConfig();
+    }
+
+    public ClientConfig build(ClientConfig clientConfig){
+        return I = clientConfig;
     }
 
     public Client create() {
@@ -80,18 +84,18 @@ public final class ClientConfig {
         return sessionStorage;
     }
 
-    public Logger getLogger() {
-        if (logger == null) {
-            logger = new DefaultLogger();
-        }
-        return logger;
-    }
-
-    public ClientConfig setLogger(Logger logger) {
-        this.logger = logger;
-        this.getLogger().enable(logEnabled);
-        return this;
-    }
+//    public Logger getLogger() {
+//        if (logger == null) {
+//            logger = new DefaultLogger();
+//        }
+//        return logger;
+//    }
+//
+//    public ClientConfig setLogger(Logger logger) {
+//        this.logger = logger;
+//        this.getLogger().enable(logger.isEnable());
+//        return this;
+//    }
 
     public String getSessionStorageDir() {
         return sessionStorageDir;
@@ -215,15 +219,15 @@ public final class ClientConfig {
         return this;
     }
 
-    public boolean isLogEnabled() {
-        return logEnabled;
-    }
-
-    public ClientConfig setLogEnabled(boolean logEnabled) {
-        this.logEnabled = logEnabled;
-        this.logger.enable(logEnabled);
-        return this;
-    }
+//    public boolean isLogEnabled() {
+//        return logEnabled;
+//    }
+//
+//    public ClientConfig setLogEnabled(boolean logEnabled) {
+//        this.logEnabled = logEnabled;
+//        this.logger.enable(logEnabled);
+//        return this;
+//    }
 
     public boolean isEnableHttpProxy() {
         return enableHttpProxy;

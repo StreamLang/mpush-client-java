@@ -29,16 +29,15 @@ import com.mpush.codec.AsyncPacketWriter;
 import com.mpush.util.IOUtils;
 import com.mpush.util.Strings;
 import com.mpush.util.thread.EventLock;
+import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
 import static com.mpush.api.Constants.MAX_RESTART_COUNT;
 import static com.mpush.api.Constants.MAX_TOTAL_RESTART_COUNT;
 import static com.mpush.client.TcpConnection.State.*;
@@ -55,7 +54,7 @@ public final class TcpConnection implements Connection {
 
     private final AtomicReference<State> state = new AtomicReference<>(disconnected);
     private final EventLock connLock = new EventLock();
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(TcpConnection.class);
     private final ClientListener listener;
     private final MPushClient client;
     private final PacketWriter writer;
@@ -73,7 +72,7 @@ public final class TcpConnection implements Connection {
     public TcpConnection(MPushClient client, PacketReceiver receiver) {
         ClientConfig config = ClientConfig.I;
         this.client = client;
-        this.logger = config.getLogger();
+//        this.logger = config.getLogger();
         this.listener = config.getClientListener();
         this.allotClient = new AllotClient();
         this.reader = new AsyncPacketReader(this, receiver);
@@ -86,7 +85,7 @@ public final class TcpConnection implements Connection {
         this.context = new SessionContext();
         this.state.set(connected);
         this.reader.startRead();
-        logger.w("connection connected !!!");
+        logger.debug("connection connected !!!");
         listener.onConnected(client);
     }
 
@@ -98,7 +97,7 @@ public final class TcpConnection implements Connection {
                 connectThread.shutdown();
             }
             doClose();
-            logger.w("connection closed !!!");
+            logger.debug("connection closed !!!");
         }
     }
 
@@ -110,7 +109,7 @@ public final class TcpConnection implements Connection {
                 if (channel.isOpen()) {
                     IOUtils.close(channel);
                     listener.onDisConnected(client);
-                    logger.w("channel closed !!!");
+                    logger.debug("channel closed !!!");
                 }
                 this.channel = null;
             }
@@ -143,8 +142,8 @@ public final class TcpConnection implements Connection {
 
     private boolean doReconnect() {
         if (totalReconnectCount > MAX_TOTAL_RESTART_COUNT || !autoConnect) {// 过载保护
-            logger.w("doReconnect failure reconnect count over limit or autoConnect off, total=%d, state=%s, autoConnect=%b"
-                    , totalReconnectCount, state.get(), autoConnect);
+            logger.warn(String.format("doReconnect failure reconnect count over limit or autoConnect off, total=%d, state=%s, autoConnect=%b"
+                    , totalReconnectCount, state.get(), autoConnect));
             state.set(State.disconnected);
             return true;
         }
@@ -152,7 +151,7 @@ public final class TcpConnection implements Connection {
         reconnectCount++;    // 记录重连次数
         totalReconnectCount++;
 
-        logger.d("try doReconnect, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get());
+        logger.debug(String.format("try doReconnect, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get()));
 
         if (reconnectCount > MAX_RESTART_COUNT) {    // 超过此值 sleep 10min
             if (connLock.await(MINUTES.toMillis(10))) {
@@ -168,12 +167,12 @@ public final class TcpConnection implements Connection {
         }
 
         if (Thread.currentThread().isInterrupted() || state.get() != connecting || !autoConnect) {
-            logger.w("doReconnect failure, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get());
+            logger.error(String.format("doReconnect failure, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get()));
             state.set(State.disconnected);
             return true;
         }
 
-        logger.w("doReconnect, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get());
+        logger.debug(String.format("doReconnect, count=%d, total=%d, autoConnect=%b, state=%s", reconnectCount, totalReconnectCount, autoConnect, state.get()));
         return doConnect();
     }
 
@@ -199,13 +198,13 @@ public final class TcpConnection implements Connection {
 
     private boolean doConnect(String host, int port) {
         connLock.lock();
-        logger.w("try connect server [%s:%s]", host, port);
+        logger.debug(String.format("try connect server [%s:%s]", host, port));
         SocketChannel channel = null;
         try {
             channel = SocketChannel.open();
             channel.socket().setTcpNoDelay(true);
             channel.connect(new InetSocketAddress(host, port));
-            logger.w("connect server ok [%s:%s]", host, port);
+            logger.debug(String.format("connect server ok [%s:%s]", host, port));
             onConnected(channel);
             connLock.signalAll();
             connLock.unlock();
@@ -213,7 +212,7 @@ public final class TcpConnection implements Connection {
         } catch (Throwable t) {
             IOUtils.close(channel);
             connLock.unlock();
-            logger.e(t, "connect server ex, [%s:%s]", host, port);
+            logger.error( String.format("connect server ex, [%s:%s]", host, port),t);
         }
         return false;
     }

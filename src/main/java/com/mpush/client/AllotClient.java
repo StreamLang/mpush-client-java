@@ -21,8 +21,8 @@ package com.mpush.client;
 
 
 import com.mpush.api.Constants;
-import com.mpush.api.Logger;
 import com.mpush.util.IOUtils;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
@@ -40,13 +40,17 @@ import java.util.List;
 
 import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
 
+//import com.mpush.api.Logger;
+
 /**
  * Created by yxx on 2016/6/8.
  *
  * @author ohun@live.cn (夜色)
  */
 /*package*/ final class AllotClient {
+    //todo 这里压根没用到alloc
     private List<String> serverAddress = new ArrayList<>();
+    private static final Logger logger = Logger.getLogger(AllotClient.class);
 
     public List<String> getServerAddress() {
         if (serverAddress.isEmpty()) {
@@ -57,7 +61,7 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
 
     public List<String> queryServerAddressList() {
         ClientConfig config = ClientConfig.I;
-        Logger logger = config.getLogger();
+//        Logger logger = config.getLogger();
 
         if (config.getAllotServer() == null) {
             if (config.getServerHost() != null) {
@@ -81,12 +85,12 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
             connection.setDoOutput(false);
             int statusCode = connection.getResponseCode();
             if (statusCode != HttpURLConnection.HTTP_OK) {
-                logger.w("get server address failure statusCode=%d", statusCode);
+                logger.error(String.format("get server address failure statusCode=%d", statusCode));
                 connection.disconnect();
                 return serverAddress;
             }
         } catch (Exception e) {
-            logger.e(e, "get server address ex, when connect server. allot=%s", config.getAllotServer());
+            logger.error(String.format("get server address ex, when connect server. allot=%s", config.getAllotServer()),e);
             return Collections.emptyList();
         }
 
@@ -100,7 +104,7 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
                 out.write(buffer, 0, count);
             }
         } catch (IOException ioe) {
-            logger.e(ioe, "get server address ex, when read result.");
+            logger.error( "get server address ex, when read result.",ioe);
             return serverAddress;
         } finally {
             IOUtils.close(in);
@@ -110,12 +114,12 @@ import static com.mpush.api.Constants.DEFAULT_SO_TIMEOUT;
         byte[] content = out.toByteArray();
         if (content.length > 0) {
             String result = new String(content, Constants.UTF_8);
-            logger.w("get server address success result=%s", result);
+            logger.debug(String.format("get server address success result=%s", result));
             List<String> serverAddress = new ArrayList<>();
             serverAddress.addAll(Arrays.asList(result.split(",")));
             this.serverAddress = serverAddress;
         } else {
-            logger.w("get server address failure return content empty.");
+            logger.warn("get server address failure return content empty.");
         }
 
         return serverAddress;

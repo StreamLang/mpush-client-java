@@ -20,12 +20,10 @@
 package com.mpush.handler;
 
 
-
+import com.mpush.api.MessageHandler;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Packet;
-import com.mpush.api.Logger;
-import com.mpush.api.MessageHandler;
-import com.mpush.client.ClientConfig;
+import org.apache.log4j.Logger;
 
 /**
  * Created by ohun on 2015/12/30.
@@ -33,10 +31,10 @@ import com.mpush.client.ClientConfig;
  * @author ohun@live.cn (夜色)
  */
 public final class HeartbeatHandler implements MessageHandler {
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(HandshakeOkHandler.class);
 
     @Override
     public void handle(Packet packet, Connection connection) {
-        logger.d(">>> receive heartbeat pong...");
+        logger.debug(">>> receive heartbeat pong...");
     }
 }

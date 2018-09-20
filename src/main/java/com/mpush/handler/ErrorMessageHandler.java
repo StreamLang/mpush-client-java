@@ -20,12 +20,13 @@
 package com.mpush.handler;
 
 
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Command;
 import com.mpush.api.protocol.Packet;
 import com.mpush.client.ClientConfig;
 import com.mpush.message.ErrorMessage;
+import org.apache.log4j.Logger;
 
 import static com.mpush.api.protocol.ErrorCode.REPEAT_HANDSHAKE;
 
@@ -35,8 +36,7 @@ import static com.mpush.api.protocol.ErrorCode.REPEAT_HANDSHAKE;
  * @author ohun@live.cn (夜色)
  */
 public final class ErrorMessageHandler extends BaseMessageHandler<ErrorMessage> {
-    private final Logger logger = ClientConfig.I.getLogger();
-
+    private static final Logger logger = Logger.getLogger(ErrorMessageHandler.class);
     @Override
     public ErrorMessage decode(Packet packet, Connection connection) {
         return new ErrorMessage(packet, connection);
@@ -44,7 +44,7 @@ public final class ErrorMessageHandler extends BaseMessageHandler<ErrorMessage> 
 
     @Override
     public void handle(ErrorMessage message) {
-        logger.w(">>> receive an error message=%s", message);
+       logger.info(String.format(">>> receive an error message=%s", message));
         if (message.cmd == Command.FAST_CONNECT.cmd) {
             ClientConfig.I.getSessionStorage().clearSession();
             message.getConnection().getClient().handshake();

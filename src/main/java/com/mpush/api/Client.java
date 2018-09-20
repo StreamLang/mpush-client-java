@@ -21,6 +21,7 @@ package com.mpush.api;
 
 
 import com.mpush.api.protocol.MPushProtocol;
+import com.mpush.client.ClientConfig;
 
 /**
  * Created by ohun on 2016/1/17.
@@ -39,4 +40,5 @@ public interface Client extends MPushProtocol {
 
     void onNetStateChange(boolean isConnected);
 
+    ClientConfig getConfig();
 }

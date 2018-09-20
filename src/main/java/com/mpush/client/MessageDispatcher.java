@@ -27,7 +27,8 @@ import com.mpush.api.protocol.Command;
 import com.mpush.api.protocol.Packet;
 import com.mpush.handler.*;
 import com.mpush.util.thread.ExecutorManager;
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ import java.util.concurrent.Executor;
 public final class MessageDispatcher implements PacketReceiver {
     private final Executor executor = ExecutorManager.INSTANCE.getDispatchThread();
     private final Map<Byte, MessageHandler> handlers = new HashMap<>();
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(MessageDispatcher.class);
     private final AckRequestMgr ackRequestMgr;
 
     public MessageDispatcher() {
@@ -72,13 +73,13 @@ public final class MessageDispatcher implements PacketReceiver {
                         doAckResponse(packet);
                         handler.handle(packet, connection);
                     } catch (Throwable throwable) {
-                        logger.e(throwable, "handle message error, packet=%s", packet);
+                        logger.error(String.format( "handle message error, packet=%s", packet),throwable);
                         connection.reconnect();
                     }
                 }
             });
         } else {
-            logger.w("<<< receive unsupported message, packet=%s", packet);
+            logger.warn(String.format("<<< receive unsupported message, packet=%s", packet));
             //connection.reconnect();
         }
     }

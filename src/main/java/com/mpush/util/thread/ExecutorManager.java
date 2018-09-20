@@ -20,14 +20,9 @@
 package com.mpush.util.thread;
 
 
-import com.mpush.client.ClientConfig;
+import org.apache.log4j.Logger;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by ohun on 2016/1/23.
@@ -35,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @author ohun@live.cn (夜色)
  */
 public final class ExecutorManager {
+    private static final Logger logger = Logger.getLogger(ExecutorManager.class);
     public static final String THREAD_NAME_PREFIX = "mp-client-";
     public static final String WRITE_THREAD_NAME = THREAD_NAME_PREFIX + "write-t";
     public static final String READ_THREAD_NAME = THREAD_NAME_PREFIX + "read-t";
@@ -100,7 +96,7 @@ public final class ExecutorManager {
 
         @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-            ClientConfig.I.getLogger().w("a task was rejected r=%s", r);
+            logger.warn(String.format("a task was rejected r=%s", r));
         }
     }
 }

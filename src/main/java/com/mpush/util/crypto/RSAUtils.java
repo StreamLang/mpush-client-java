@@ -22,7 +22,7 @@ package com.mpush.util.crypto;
 
 
 import com.mpush.api.Constants;
-import com.mpush.client.ClientConfig;
+import org.apache.log4j.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -45,6 +45,7 @@ import java.security.spec.X509EncodedKeySpec;
  * 非对称加密算法可以用来对对称加密的密钥加密，这样保证密钥的安全也就保证了数据的安全
  */
 public final class RSAUtils {
+    private static final Logger logger = Logger.getLogger(RSAUtils.class);
 
     /**
      * 密钥位数
@@ -167,6 +168,7 @@ public final class RSAUtils {
             RSAPublicKeySpec keySpec = new RSAPublicKeySpec(b1, b2);
             return (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
+            logger.error(e.getMessage(),e);
             //LOGGER.error("getPublicKey ex modulus={}, exponent={}", modulus, exponent, e);
         }
         return null;
@@ -190,6 +192,7 @@ public final class RSAUtils {
             RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(b1, b2);
             return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
+            logger.error(e.getMessage(),e);
             //LOGGER.error("getPrivateKey ex modulus={}, exponent={}", modulus, exponent, e);
             return null;
         }
@@ -212,7 +215,8 @@ public final class RSAUtils {
             //如果明文长度大于模长-11则要分组加密
             return doFinal(cipher, data, key_len - 11);
         } catch (Exception e) {
-            ClientConfig.I.getLogger().e(e, "encryptByPublicKey ex");
+            logger.error("encryptByPublicKey exception",e);
+//            ClientConfig.I.getLogger().e(e, "encryptByPublicKey ex");
         }
         return Constants.EMPTY_BYTES;
     }
@@ -233,7 +237,8 @@ public final class RSAUtils {
             //如果密文长度大于模长则要分组解密
             return doFinal(cipher, data, key_len);
         } catch (Exception e) {
-            ClientConfig.I.getLogger().e(e, "decryptByPrivateKey ex");
+            logger.error("decryptByPrivateKey exception",e);
+//            ClientConfig.I.getLogger().e(e, "decryptByPrivateKey ex");
         }
         return Constants.EMPTY_BYTES;
     }

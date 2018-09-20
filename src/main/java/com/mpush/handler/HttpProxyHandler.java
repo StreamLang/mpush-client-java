@@ -24,9 +24,8 @@ import com.mpush.api.connection.Connection;
 import com.mpush.api.http.HttpResponse;
 import com.mpush.api.protocol.Packet;
 import com.mpush.client.HttpRequestMgr;
-import com.mpush.api.Logger;
-import com.mpush.client.ClientConfig;
 import com.mpush.message.HttpResponseMessage;
+import org.apache.log4j.Logger;
 
 /**
  * Created by ohun on 2015/12/30.
@@ -34,7 +33,7 @@ import com.mpush.message.HttpResponseMessage;
  * @author ohun@live.cn (夜色)
  */
 public final class HttpProxyHandler extends BaseMessageHandler<HttpResponseMessage> {
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(HttpProxyHandler.class);
     private final HttpRequestMgr httpRequestMgr;
 
     public HttpProxyHandler() {
@@ -53,6 +52,6 @@ public final class HttpProxyHandler extends BaseMessageHandler<HttpResponseMessa
             HttpResponse response = new HttpResponse(message.statusCode, message.reasonPhrase, message.headers, message.body);
             task.setResponse(response);
         }
-        logger.d(">>> receive one response, sessionId=%d, statusCode=%d", message.getSessionId(), message.statusCode);
+         logger.debug(String.format(">>> receive one response, sessionId=%d, statusCode=%d", message.getSessionId(), message.statusCode));
     }
 }

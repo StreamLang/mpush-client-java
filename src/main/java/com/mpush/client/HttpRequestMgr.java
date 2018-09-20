@@ -22,9 +22,10 @@ package com.mpush.client;
 
 import com.mpush.api.http.HttpCallback;
 import com.mpush.api.http.HttpRequest;
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
 import com.mpush.api.http.HttpResponse;
 import com.mpush.util.thread.ExecutorManager;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -55,7 +56,7 @@ public final class HttpRequestMgr {
             return response408;
         }
     };
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(HttpRequestMgr.class);
 
     public static HttpRequestMgr I() {
         if (I == null) {
@@ -116,8 +117,8 @@ public final class HttpRequestMgr {
                     }
                 }
             }
-            logger.d("one request task cancelled, sessionId=%d, costTime=%d, uri=%s",
-                    sessionId, (System.currentTimeMillis() - sendTime), uri);
+            logger.debug(String.format("one request task cancelled, sessionId=%d, costTime=%d, uri=%s",
+                    sessionId, (System.currentTimeMillis() - sendTime), uri));
             return success;
         }
 
@@ -135,8 +136,8 @@ public final class HttpRequestMgr {
                 }
                 callback = null;
             }
-            logger.d("one request task end, sessionId=%d, costTime=%d, response=%d, uri=%s",
-                    sessionId, (System.currentTimeMillis() - sendTime), response.statusCode, uri);
+            logger.debug(String.format("one request task end, sessionId=%d, costTime=%d, response=%d, uri=%s",
+                    sessionId, (System.currentTimeMillis() - sendTime), response.statusCode, uri));
         }
     }
 }

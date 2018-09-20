@@ -19,13 +19,14 @@
 
 package com.mpush.client;
 
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
 import com.mpush.api.ack.AckCallback;
 import com.mpush.api.ack.AckContext;
 import com.mpush.api.ack.AckModel;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Packet;
 import com.mpush.util.thread.ExecutorManager;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -38,7 +39,7 @@ import java.util.concurrent.*;
 public final class AckRequestMgr {
     private static AckRequestMgr I;
 
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(AckRequestMgr.class);
 
     private final Map<Integer, RequestTask> queue = new ConcurrentHashMap<>();
     private final ScheduledExecutorService timer = ExecutorManager.INSTANCE.getTimerThread();
@@ -143,19 +144,19 @@ public final class AckRequestMgr {
                 this.set(success);
                 if (callback != null) {
                     if (success) {
-                        logger.d("receive one ack response, sessionId=%d, costTime=%d, request=%s, response=%s"
-                                , sessionId, (System.currentTimeMillis() - sendTime), request, response
+                        logger.info(String.format("receive one ack response, sessionId=%d, costTime=%d, request=%s, response=%s"
+                                , sessionId, (System.currentTimeMillis() - sendTime), request, response)
                         );
                         callback.onSuccess(response);
                     } else if (request != null && retryCount > 0) {
-                        logger.w("one ack request timeout, retry=%d, sessionId=%d, costTime=%d, request=%s"
-                                , retryCount, sessionId, (System.currentTimeMillis() - sendTime), request
+                        logger.warn(String.format("one ack request timeout, retry=%d, sessionId=%d, costTime=%d, request=%s"
+                                , retryCount, sessionId, (System.currentTimeMillis() - sendTime), request)
                         );
                         addTask(copy(retryCount - 1));
                         connection.send(request);
                     } else {
-                        logger.w("one ack request timeout, sessionId=%d, costTime=%d, request=%s"
-                                , sessionId, (System.currentTimeMillis() - sendTime), request
+                        logger.warn(String.format("one ack request timeout, sessionId=%d, costTime=%d, request=%s"
+                                , sessionId, (System.currentTimeMillis() - sendTime), request)
                         );
                         callback.onTimeout(request);
                     }

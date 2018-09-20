@@ -21,7 +21,7 @@ package com.mpush.client;
 
 
 import com.mpush.api.Client;
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
 import com.mpush.api.ack.AckCallback;
 import com.mpush.api.ack.AckContext;
 import com.mpush.api.connection.SessionContext;
@@ -38,6 +38,7 @@ import com.mpush.security.CipherBox;
 import com.mpush.session.PersistentSession;
 import com.mpush.util.Strings;
 import com.mpush.util.thread.ExecutorManager;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -59,15 +60,21 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
 
     private final TcpConnection connection;
     private final ClientConfig config;
-    private final Logger logger;
+    //    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(MPushClient.class);
     private int hbTimeoutTimes;
 
     private AckRequestMgr ackRequestMgr;
     private HttpRequestMgr httpRequestMgr;
 
+    @Override
+    public ClientConfig getConfig() {
+        return config;
+    }
+
     /*package*/ MPushClient(ClientConfig config) {
         this.config = config;
-        this.logger = config.getLogger();
+//        this.logger = config.getLogger();
 
         MessageDispatcher receiver = new MessageDispatcher();
 
@@ -83,16 +90,21 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
 
     @Override
     public void start() {
+//        System.out.println(String.format("===start ==== userId:%s ==== deviceId:%s",
+//                config.getUserId(), config.getDeviceId()));
+//        if (!config.getUserId().equals(config.getDeviceId())) {
+//        }
+
         if (clientState.compareAndSet(State.Shutdown, State.Started)) {
             connection.setAutoConnect(true);
             connection.connect();
-            logger.w("do start client ...");
+            logger.debug("do start client ...");
         }
     }
 
     @Override
     public void stop() {
-        logger.w("client shutdown !!!, state=%s", clientState.get());
+        logger.debug(String.format("client shutdown !!!, state=%s", clientState.get()));
         if (clientState.compareAndSet(State.Started, State.Shutdown)) {
             connection.setAutoConnect(false);
             connection.close();
@@ -103,7 +115,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
     public void destroy() {
         if (clientState.get() != State.Destroyed) {
             this.stop();
-            logger.w("client destroy !!!");
+            logger.debug("client destroy !!!");
             ExecutorManager.INSTANCE.shutdown();
             ClientConfig.I.destroy();
             clientState.set(State.Destroyed);
@@ -130,7 +142,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
     @Override
     public void onNetStateChange(boolean isConnected) {
         connection.setAutoConnect(isConnected);
-        logger.i("network state change, isConnected=%b, connection=%s", isConnected, connection);
+        logger.info(String.format("network state change, isConnected=%b, connection=%s", isConnected, connection));
         if (isConnected) { //当有网络时，去尝试重连
             connection.connect();
         } else if (connection.isConnected()) { //无网络，如果连接没有断开，尝试发送一次心跳检测，用于快速校验网络状况
@@ -144,7 +156,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
 
                 @Override
                 public void run() {
-                    logger.w("network disconnected, try test tcp connection checkCount=%d, connection=%s", checkCount, connection);
+                    logger.debug(String.format("network disconnected, try test tcp connection checkCount=%d, connection=%s", checkCount, connection));
                     //如果期间连接状态发生变化，取消任务
                     if (connection.isAutoConnect() || !connection.isConnected()) return;
 
@@ -164,20 +176,20 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
 
         if (connection.isReadTimeout()) {
             hbTimeoutTimes++;
-            logger.w("heartbeat timeout times=%s", hbTimeoutTimes);
+            logger.warn(String.format("heartbeat timeout times=%s", hbTimeoutTimes));
         } else {
             hbTimeoutTimes = 0;
         }
 
         if (hbTimeoutTimes >= MAX_HB_TIMEOUT_COUNT) {
-            logger.w("heartbeat timeout times=%d over limit=%d, client restart", hbTimeoutTimes, MAX_HB_TIMEOUT_COUNT);
+            logger.warn(String.format("heartbeat timeout times=%d over limit=%d, client restart", hbTimeoutTimes, MAX_HB_TIMEOUT_COUNT));
             hbTimeoutTimes = 0;
             connection.reconnect();
             return false;
         }
 
         if (connection.isWriteTimeout()) {
-            logger.d("<<< send heartbeat ping...");
+            logger.debug("<<< send heartbeat ping...");
             connection.send(Packet.HB_PACKET);
         }
 
@@ -201,12 +213,14 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
         PersistentSession session = PersistentSession.decode(ss);
         if (session == null || session.isExpired()) {
             storage.clearSession();
-            logger.w("fast connect failure session expired, session=%s", session);
+            logger.warn(String.format("fast connect failure session expired, session=%s", session));
             handshake();
             return;
         }
 
         FastConnectMessage message = new FastConnectMessage(connection);
+//        System.out.println(String.format("===fast connect==== userId:%s ==== deviceId:%s === object : %s",
+//                config.getUserId(), config.getDeviceId(),this.toString()));
         message.deviceId = config.getDeviceId();
         message.sessionId = session.sessionId;
         message.maxHeartbeat = config.getMaxHeartbeat();
@@ -218,7 +232,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
                 .setTimeout(config.getHandshakeTimeoutMills())
                 .setRetryCount(config.getHandshakeRetryCount())
         );
-        logger.w("<<< do fast connect, message=%s", message);
+        logger.debug(String.format("<<< do fast connect, message=%s", message));
         message.sendRaw();
         connection.getSessionContext().changeCipher(session.cipher);
     }
@@ -243,20 +257,23 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
                 .setTimeout(config.getHandshakeTimeoutMills())
                 .setRetryCount(config.getHandshakeRetryCount())
         );
-        logger.w("<<< do handshake, message=%s", message);
+        logger.debug(String.format("<<< do handshake, message=%s", message));
+//        System.out.println(String.format("===hand shake==== userId:%s ==== deviceId:%s",
+//                config.getUserId(), config.getDeviceId()));
         message.send();
         context.changeCipher(new AesCipher(message.clientKey, message.iv));
     }
 
     @Override
     public void bindUser(final String userId, final String tags) {
+//        System.err.println("=========bind user id:" + userId);
         if (!connection.getSessionContext().handshakeOk()) {
-            logger.w("connection is not handshake ok!");
+            logger.error("connection handshake is not ok!");
             return;
         }
 
         if (Strings.isBlank(userId)) {
-            logger.w("bind user is null");
+            logger.error("bind user is null");
             return;
         }
         SessionContext context = connection.getSessionContext();
@@ -280,7 +297,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
                 .setTimeout(config.getBindUserTimeoutMills())
                 .setRetryCount(config.getBindUserRetryCount())
         );
-        logger.w("<<< do bind user, userId=%s", userId);
+        logger.debug(String.format("<<< do bind user, userId=%s", userId));
         message.send();
 
     }
@@ -288,12 +305,12 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
     @Override
     public void unbindUser() {
         if (!connection.getSessionContext().handshakeOk()) {
-            logger.w("connection is not handshake ok!");
+            logger.error("connection  handshake is not ok!");
             return;
         }
         String userId = config.getUserId();
         if (Strings.isBlank(userId)) {
-            logger.w("unbind user is null");
+            logger.error("unbind user is null");
             return;
         }
         config.setUserId(null).setTags(null);
@@ -302,7 +319,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
                 .buildUnbind(connection)
                 .setUserId(userId)
                 .send();
-        logger.w("<<< do unbind user, userId=%s", userId);
+        logger.debug(String.format("<<< do unbind user, userId=%s", userId));
     }
 
     @Override
@@ -310,20 +327,20 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
         if (messageId > 0) {
             AckMessage ackMessage = new AckMessage(messageId, connection);
             ackMessage.sendRaw();
-            logger.d("<<< send ack for push messageId=%d", messageId);
+            logger.debug(String.format("<<< send ack for push messageId=%d", messageId));
         }
     }
 
     @Override
     public Future<Boolean> push(PushContext context) {
         if (!connection.getSessionContext().handshakeOk()) {
-            logger.w("connection is not handshake ok!");
+            logger.error("connection handshake is not ok!");
             return null;
         }
         PushMessage message = new PushMessage(context.content, connection);
         message.addFlag(context.ackModel.flag);
         message.send();
-        logger.d("<<< send push message=%s", message);
+        logger.debug(String.format("<<< send push message=%s", message));
         return ackRequestMgr.add(message.getSessionId(), context);
     }
 
@@ -336,7 +353,7 @@ import static com.mpush.api.Constants.MAX_HB_TIMEOUT_COUNT;
             message.headers = request.getHeaders();
             message.body = request.getBody();
             message.send();
-            logger.d("<<< send http proxy, request=%s", request);
+            logger.debug(String.format("<<< send http proxy, request=%s", request));
             return httpRequestMgr.add(message.getSessionId(), request);
         }
         return null;

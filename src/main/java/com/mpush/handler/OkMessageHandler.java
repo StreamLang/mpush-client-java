@@ -23,9 +23,9 @@ package com.mpush.handler;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Command;
 import com.mpush.api.protocol.Packet;
-import com.mpush.message.OkMessage;
-import com.mpush.api.Logger;
 import com.mpush.client.ClientConfig;
+import com.mpush.message.OkMessage;
+import org.apache.log4j.Logger;
 
 /**
  * Created by ohun on 2015/12/30.
@@ -33,7 +33,7 @@ import com.mpush.client.ClientConfig;
  * @author ohun@live.cn (夜色)
  */
 public final class OkMessageHandler extends BaseMessageHandler<OkMessage> {
-    private final Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(OkMessageHandler.class);
 
     @Override
     public OkMessage decode(Packet packet, Connection connection) {
@@ -48,6 +48,6 @@ public final class OkMessageHandler extends BaseMessageHandler<OkMessage> {
             ClientConfig.I.getClientListener().onUnbind(true, null);
         }
 
-        logger.w(">>> receive ok message=%s", message);
+        logger.debug(String.format(">>> receive ok message=%s", message));
     }
 }

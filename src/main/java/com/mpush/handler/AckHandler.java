@@ -19,10 +19,10 @@
 
 package com.mpush.handler;
 
-import com.mpush.api.Logger;
+//import com.mpush.api.Logger;
+
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Packet;
-import com.mpush.client.ClientConfig;
 import com.mpush.client.AckRequestMgr;
 import com.mpush.message.AckMessage;
 
@@ -33,11 +33,12 @@ import com.mpush.message.AckMessage;
  */
 public class AckHandler extends BaseMessageHandler<AckMessage> {
 
-    private final Logger logger;
+//    private static final Logger logger = Logger.getLogger(AckHandler.class);
+
     private final AckRequestMgr ackRequestMgr;
 
     public AckHandler() {
-        this.logger = ClientConfig.I.getLogger();
+//        this.logger = ClientConfig.I.getLogger();
         this.ackRequestMgr = AckRequestMgr.I();
     }
 

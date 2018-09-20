@@ -22,6 +22,7 @@ package com.mpush.client;
 
 import com.mpush.util.thread.EventLock;
 import com.mpush.util.thread.ExecutorManager;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.Callable;
 
@@ -31,9 +32,11 @@ import java.util.concurrent.Callable;
  * @author ohun@live.cn (夜色)
  */
 public class ConnectThread extends Thread {
+    private static final Logger logger = Logger.getLogger(ConnectThread.class);
     private volatile Callable<Boolean> runningTask;
     private volatile boolean runningFlag = true;
     private final EventLock connLock;
+
     public ConnectThread(EventLock connLock) {
         this.connLock = connLock;
         this.setName(ExecutorManager.START_THREAD_NAME);
@@ -69,7 +72,7 @@ public class ConnectThread extends Thread {
             } catch (InterruptedException e) {
                 continue;
             } catch (Exception e) {
-                ClientConfig.I.getLogger().e(e, "run connect task error");
+                logger.error("run connect task error", e);
                 break;
             }
         }

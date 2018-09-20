@@ -20,9 +20,8 @@
 package com.mpush.util.crypto;
 
 
-
-import com.mpush.client.ClientConfig;
 import com.mpush.api.Constants;
+import org.apache.log4j.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -37,6 +36,7 @@ public final class AESUtils {
     public static final String KEY_ALGORITHM = "AES";
     public static final String KEY_ALGORITHM_PADDING = "AES/CBC/PKCS5Padding";
 
+    private static final Logger logger = Logger.getLogger(AESUtils.class);
 
     public static byte[] encrypt(byte[] data, byte[] encryptKey, byte[] iv) {
         IvParameterSpec zeroIv = new IvParameterSpec(iv);
@@ -46,7 +46,7 @@ public final class AESUtils {
             cipher.init(Cipher.ENCRYPT_MODE, key, zeroIv);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            ClientConfig.I.getLogger().e(e, "encrypt ex, decryptKey=%s", encryptKey);
+            logger.error(String.format("encrypt ex, decryptKey=%s", encryptKey), e);
         }
         return Constants.EMPTY_BYTES;
     }
@@ -59,7 +59,7 @@ public final class AESUtils {
             cipher.init(Cipher.DECRYPT_MODE, key, zeroIv);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            ClientConfig.I.getLogger().e(e, "decrypt ex, decryptKey=%s", decryptKey);
+            logger.error(String.format("decrypt ex, decryptKey=%s", decryptKey), e);
         }
         return Constants.EMPTY_BYTES;
     }

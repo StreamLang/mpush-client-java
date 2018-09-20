@@ -26,7 +26,7 @@ import com.mpush.util.thread.ExecutorManager;
 
 import java.util.concurrent.Executor;
 
-/*package*/ final class DefaultClientListener implements ClientListener {
+public/*package*/ final class DefaultClientListener implements ClientListener {
     private final Executor executor = ExecutorManager.INSTANCE.getDispatchThread();
     private ClientListener listener;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onConnected(client);
+                    listener.onConnected(client);// todo 写死了true？ 实际开发中应该如何设计
                 }
             });
         }
@@ -65,7 +65,8 @@ import java.util.concurrent.Executor;
         if (listener != null) {//dispatcher已经使用了Executor，此处直接同步调用
             listener.onHandshakeOk(client, heartbeat);
         }
-        client.bindUser(ClientConfig.I.getUserId(), ClientConfig.I.getTags());
+//        System.err.println("=========handshake ok , userId:" + client.getConfig().getUserId() +" , client addr:" +client.toString());
+        client.bindUser(client.getConfig().getUserId(),client.getConfig().getTags());
     }
 
     @Override

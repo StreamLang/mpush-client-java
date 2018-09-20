@@ -23,9 +23,9 @@ package com.mpush.handler;
 import com.mpush.api.ClientListener;
 import com.mpush.api.connection.Connection;
 import com.mpush.api.protocol.Packet;
-import com.mpush.api.Logger;
 import com.mpush.client.ClientConfig;
 import com.mpush.message.KickUserMessage;
+import org.apache.log4j.Logger;
 
 /**
  * Created by ohun on 2016/1/23.
@@ -33,7 +33,7 @@ import com.mpush.message.KickUserMessage;
  * @author ohun@live.cn (夜色)
  */
 public final class KickUserHandler extends BaseMessageHandler<KickUserMessage> {
-    private Logger logger = ClientConfig.I.getLogger();
+    private static final Logger logger = Logger.getLogger(KickUserHandler.class);
 
     @Override
     public KickUserMessage decode(Packet packet, Connection connection) {
@@ -42,7 +42,7 @@ public final class KickUserHandler extends BaseMessageHandler<KickUserMessage> {
 
     @Override
     public void handle(KickUserMessage message) {
-        logger.w(">>> receive kickUser message=%s", message);
+        logger.debug(String.format(">>> receive kickUser message=%s", message));
         ClientListener listener = ClientConfig.I.getClientListener();
         listener.onKickUser(message.deviceId, message.userId);
     }
